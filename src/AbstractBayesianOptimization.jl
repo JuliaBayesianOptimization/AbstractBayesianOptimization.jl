@@ -6,15 +6,15 @@ module AbstractBayesianOptimization
 using Printf
 
 export
-# abstract types and interface
-      AbstractDecisionSupportModel, AbstractPolicy,
-      initialize!, update!, apply_policy!,
-# main optimization loop
-      optimize!,
-# helpers for problem definition & optimization statistics
-      OptimizationHelper, evaluate_objective!, get_hist, get_solution, Min, Max,
-# utilities
-      from_unit_cube, to_unit_cube
+    # abstract types and interface
+    AbstractDecisionSupportModel, AbstractPolicy,
+    initialize!, update!, apply_policy!,
+    # main optimization loop
+    optimize!,
+    # helpers for problem definition & optimization statistics
+    OptimizationHelper, evaluate_objective!, get_hist, get_solution, Min, Max,
+    # utilities
+    from_unit_cube, to_unit_cube
 
 """
 Maintain a state of the decision support model (e.g. trust regions, local surrogates and
@@ -76,7 +76,7 @@ include("utils.jl")
 Run the optimization loop.
 """
 function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
-                   oh::OptimizationHelper)
+    oh::OptimizationHelper)
     # TODO: add `&& oh.stats.total_duration <= oh.problem.max_duration` once implemented in oh
     while !dsm.state.isdone && oh.stats.evaluation_counter <= oh.problem.max_evaluations
         # apply policy to get a new batch

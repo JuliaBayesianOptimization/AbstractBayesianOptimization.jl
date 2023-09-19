@@ -14,6 +14,6 @@ struct UnconstrainedProblem{S <: Real} <: AbstractOptimizationProblem
     ub::Vector{S}
     max_evaluations::Int
     # max_duration::Int
-    # TODO: verbosity, for now we print everything
-    # verbosity::Any
+    # TODO: verbose levels, now Bool
+    verbose::Bool
 end

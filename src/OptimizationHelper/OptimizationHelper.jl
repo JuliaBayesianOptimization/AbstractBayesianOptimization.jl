@@ -20,20 +20,22 @@ the domain from lower (upper) bound.
 
 Argument `sense` can be either `Max` or `Min`.
 """
-function OptimizationHelper(g, sense::Sense, lb::Vector{U}, ub::Vector{U}, max_evaluations; range_type = Float64, no_history = false) where U
+function OptimizationHelper(g, sense::Sense, lb::Vector{U}, ub::Vector{U}, max_evaluations; range_type = Float64, verbose = true, no_history = false) where U
     max_evaluations <= 0 && throw(ArgumentError("max_evaluations <= 0"))
     all(lb .<= ub) || throw(ArgumentError("lowerbounds are not componentwise less or equal to upperbounds"))
     length(lb) == length(ub) ||
         throw(ArgumentError("lowerbounds, upperbounds have different lengths"))
-    # Preprocessing: rescale domain to [0,1]^dim, make it a maximization problem
+    # infer dimension of the domain from lower (upper) bound
+    dimension = length(lb)
+    # Preprocessing: rescale the domain to [0,1]^dim, make it a maximization problem
     f(x) = Int(sense) * g(from_unit_cube(x, lb, ub))
-    # infer type of domain & dimension from lower (upper) bound,
-    problem = UnconstrainedProblem(f, length(lb), U, range_type, sense, lb, ub, max_evaluations)
+    # infer type of the domain from lower (upper) bound
+    problem = UnconstrainedProblem(f, dimension, U, range_type, sense, lb, ub, max_evaluations, verbose)
     init_stats = OptimizationStats(0,
                                     no_history,
                                    Vector{Vector{U}}(),
                                    Vector{range_type}(),
-                                   Vector{U}(),
+                                   Vector{U}(undef, dimension),
                                    -Inf)
     OptimizationHelper(problem, init_stats)
 end
@@ -41,19 +43,22 @@ end
 """
     evaluate_objective!(oh::OptimizationHelper, xs)
 
-Evaluate objective. Log number of function evaluations & total duration.
+Evaluate objective at (normalized) `xs` ⊂ [0,1]^dimension.
 
+Log the number of function evaluations & total duration.
 Update observed optimizer & optimal value.
+
 The (normalized) objective should only be evaluated using this method.
 """
 function evaluate_objective!(oh::OptimizationHelper, xs)
+    all( all(0 .<= x .<= 1) for x in xs ) || throw(ArgumentError("trying to evaluate at points outside unit cube"))
     # TODO: increase total duration time in oh
     ys = (oh.problem.f).(xs)
     oh.stats.evaluation_counter += length(xs)
-    if eltype(ys) != oh.range_type
+    if eltype(ys) != oh.problem.range_type
         throw(ErrorException("passed range_type does not coincide with actual type of evaluation result"))
     end
-    if eltype(xs) != oh.domain_eltype
+    if eltype(eltype(xs)) != oh.problem.domain_eltype
         throw(ErrorException("infered domain_eltype from lower (upper) bounds does not coincide with actual type of point we evaluate the objective at"))
     end
     oh.stats.no_history || update_hist!(oh, xs, ys)
@@ -63,7 +68,7 @@ function evaluate_objective!(oh::OptimizationHelper, xs)
         # copy elementwise from xs[argmax_ys] into oh.observed_maximizer (dimensions have to be equal)
         oh.stats.observed_maximizer .= xs[argmax_ys]
         # TODO: printing based on verbose levels
-        @info @sprintf "#eval: %4i, new best objective approx. %6.4f" oh.stats.evaluation_counter oh.stats.observed_maximum
+        oh.problem.verbose && @info @sprintf "#eval: %4i, new best objective approx. %6.4f" oh.stats.evaluation_counter oh.stats.observed_maximum
     end
     ys
 end

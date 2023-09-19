@@ -8,7 +8,7 @@ using Printf
 export
 # abstract types and interface
       AbstractDecisionSupportModel, AbstractPolicy,
-      initialize!, update!,
+      initialize!, update!, apply_policy!,
 # main optimization loop
       optimize!,
 # helpers for problem definition & optimization statistics
@@ -60,9 +60,9 @@ function update! end
 """
     apply_policy(policy::AbstractPolicy, dsm::AbstractDecisionSupportModel, oh::OptimizationHelper)
 
-Get the next batch of points for evaluation.
+Get the next batch of points for evaluation, applying policy may change internal state of `policy`.
 """
-function apply_policy end
+function apply_policy! end
 
 # idea from BaysianOptimization.jl
 @enum Sense Min=-1 Max=1
@@ -80,7 +80,7 @@ function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
     # TODO: add `&& oh.stats.total_duration <= oh.problem.max_duration` once implemented in oh
     while !dsm.state.isdone && oh.stats.evaluation_counter <= oh.problem.max_evaluations
         # apply policy to get a new batch
-        xs = apply_policy(policy, dsm, oh)
+        xs = apply_policy!(policy, dsm, oh)
         ys = evaluate_objective!(oh, xs)
         # trigger update of the decision support model, this may further evaluate f
         update!(dsm, oh, xs, ys)

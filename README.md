@@ -1,7 +1,5 @@
 # AbstractBayesianOptimization
 
-[![Build Status](https://github.com/samuelbelko/AbstractBayesianOptimization.jl/actions/workflows/CI.yml/badge.svg?branch=)](https://github.com/samuelbelko/AbstractBayesianOptimization.jl/actions/workflows/CI.yml?query=branch%3A)
-
 *This repo contains experimental code at the moment.*
 
 ## About

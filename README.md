@@ -4,6 +4,8 @@
 
 ## About
 
-This package implements a prototypical Bayesian optimization algorithm using abstract building blocks. It also provides basic utilities for problem definition and logging.
+This package formulates a prototypical Bayesian optimization algorithm using abstract building blocks. Currently it supports gradient free optimization only.
 
-The purpose of this little framework is to reuse code when implementing a new Bayesian optimization algorithm in Julia and to expose it via a unified interface.
+It comes with a basic `OptimizationHelper` that provides utilities for unconstrained problem definition and logging.
+
+The purpose of this little framework is to reuse code and to expose Bayesian optimization algorithms via a unified interface.

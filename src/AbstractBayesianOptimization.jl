@@ -12,8 +12,12 @@ export AbstractDecisionSupportModel,
 export optimize!
 include("BayesianOptimizationBase.jl")
 
-# helpers for problem definition & optimization logging
-export OptimizationHelper, evaluate_objective!, get_hist, get_solution, Min, Max
+# helpers for problem definition & logging
+export Min, Max
+export OptimizationHelper, evaluate_objective!
+export get_hist, get_solution, get_dimension, get_domain_eltype, get_range_type,
+    get_evaluation_counter, get_max_evaluations
+
 include("OptimizationHelper.jl")
 
 # utilities

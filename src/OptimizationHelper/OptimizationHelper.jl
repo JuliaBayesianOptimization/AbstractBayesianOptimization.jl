@@ -7,7 +7,7 @@ Saves optimization problem and maintains progress.
 Internally, the problem is normalized, i.e., the domain is transformed into a unit cube and
 the problem becomes a maximization problem.
 """
-struct OptimizationHelper{T <: AbstractOptimizationProblem}
+struct OptimizationHelper{T <: AbstractOptimizationProblem} <: AbstractOptimizationHelper
     problem::T
     stats::OptimizationStats
 end
@@ -129,4 +129,14 @@ Return a tuple consisting of an observed optimizer and optimal value.
 function get_solution(oh::OptimizationHelper)
     from_unit_cube(oh.stats.observed_maximizer, oh.problem.lb, oh.problem.ub),
     Int(oh.problem.sense) * oh.stats.observed_maximum
+end
+
+function is_done(oh::OptimizationHelper; verbose = true)
+    # TODO: add `&& oh.stats.total_duration <= oh.problem.max_duration` once implemented in oh
+    if oh.stats.evaluation_counter > oh.problem.max_evaluations
+        verbose && @info "Maximum number of evaluations is reached."
+        return true
+    else
+        return false
+    end
 end

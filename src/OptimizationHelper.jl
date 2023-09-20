@@ -173,3 +173,7 @@ function is_done(oh::OptimizationHelper; verbose = true)
         return false
     end
 end
+
+get_dimension(oh::OptimizationHelper) = oh.problem.dimension
+get_domain_eltype(oh::OptimizationHelper) = oh.problem.domain_eltype
+get_range_type(oh::OptimizationHelper) = oh.problem.range_type

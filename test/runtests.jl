@@ -176,3 +176,34 @@ end
     @test length(oh9.stats.hist_xs) == 4
     @test length(oh9.stats.hist_ys) == 4
 end
+
+@testset "OptimizationHelper: the rest of getters" begin
+    oh10 = OptimizationHelper(x -> x[1] + x[2],
+        Min,
+        [-1.0, 1.0],
+        [1.0, 1.5],
+        50,
+        verbose = false)
+    @test get_dimension(oh10) == 2
+    @test get_domain_eltype(oh10) == Float64
+    @test get_range_type(oh10) == Float64
+    @test get_evaluation_counter(oh10) == 0
+    @test get_max_evaluations(oh10) == 50
+end
+
+@testset "OptimizationHelper: is_done" begin
+    oh11 = OptimizationHelper(x -> x[1] + x[2],
+        Min,
+        [0.0, 0.0],
+        [1.0, 1.0],
+        2,
+        verbose = false)
+    @test !is_done(oh11; verbose = false)
+    evaluate_objective!(oh11, [[0.1, 0.9]])
+    @test !is_done(oh11; verbose = false)
+    evaluate_objective!(oh11, [[0.2, 0.9]])
+    # now we are done
+    @test is_done(oh11; verbose = false)
+    evaluate_objective!(oh11, [[0.1, 0.9], [0.1, 0.3]])
+    @test is_done(oh11; verbose = false)
+end

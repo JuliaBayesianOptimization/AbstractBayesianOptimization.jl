@@ -168,7 +168,7 @@ end
 
 function is_done(oh::OptimizationHelper; verbose = true)
     # TODO: add `&& oh.stats.total_duration <= oh.problem.max_duration` once implemented in oh
-    if oh.stats.evaluation_counter > oh.problem.max_evaluations
+    if oh.stats.evaluation_counter >= oh.problem.max_evaluations
         verbose && @info "Maximum number of evaluations is reached."
         return true
     else

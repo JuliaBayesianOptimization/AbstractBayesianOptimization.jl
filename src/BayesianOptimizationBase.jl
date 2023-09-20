@@ -80,4 +80,5 @@ function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
         # trigger update of the decision support model, this may further evaluate f
         update!(dsm, oh, xs, ys)
     end
+    return nothing
 end

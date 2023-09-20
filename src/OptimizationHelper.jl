@@ -87,13 +87,14 @@ function OptimizationHelper(g,
         Vector{range_type}(),
         Vector{U}(undef, dimension),
         -Inf)
-    OptimizationHelper(problem, init_stats)
+    return OptimizationHelper(problem, init_stats)
 end
 
 """
     evaluate_objective!(oh::OptimizationHelper, xs)
 
-Evaluate objective at (normalized) `xs` ⊂ [0,1]^dimension.
+Evaluate objective at (normalized) `xs` ⊂ [0,1]^dimension, return (normalized) `ys`, i.e.,
+with the opposite sign if the orginal problem was to minimize.
 
 Log the number of function evaluations & total duration.
 Update observed optimizer & optimal value.
@@ -122,7 +123,7 @@ function evaluate_objective!(oh::OptimizationHelper, xs)
         oh.problem.verbose &&
             @info @sprintf "#eval: %4i, new best objective approx. %6.4f" oh.stats.evaluation_counter oh.stats.observed_maximum
     end
-    ys
+    return ys
 end
 """
     update_hist!(oh::OptimizationHelper, xs, ys)
@@ -138,6 +139,7 @@ function update_hist!(oh::OptimizationHelper, xs, ys)
     length(xs) == length(ys) || throw(ArgumentError("xs, ys have different lenghts"))
     append!(oh.stats.hist_xs, xs)
     append!(oh.stats.hist_ys, ys)
+    return nothing
 end
 
 """
@@ -150,7 +152,7 @@ function get_hist(oh::OptimizationHelper)
     oh.stats.no_history &&
         throw(ErrorException("calling get_hist with flag no_hist = true"))
     # rescale from unit cube to lb, ub
-    [from_unit_cube(x, oh.problem.lb, oh.problem.ub) for x in oh.stats.hist_xs],
+    return [from_unit_cube(x, oh.problem.lb, oh.problem.ub) for x in oh.stats.hist_xs],
     Int(oh.problem.sense) .* oh.stats.hist_ys
 end
 
@@ -160,7 +162,7 @@ end
 Return a tuple consisting of an observed optimizer and optimal value.
 """
 function get_solution(oh::OptimizationHelper)
-    from_unit_cube(oh.stats.observed_maximizer, oh.problem.lb, oh.problem.ub),
+    return from_unit_cube(oh.stats.observed_maximizer, oh.problem.lb, oh.problem.ub),
     Int(oh.problem.sense) * oh.stats.observed_maximum
 end
 
@@ -177,3 +179,5 @@ end
 get_dimension(oh::OptimizationHelper) = oh.problem.dimension
 get_domain_eltype(oh::OptimizationHelper) = oh.problem.domain_eltype
 get_range_type(oh::OptimizationHelper) = oh.problem.range_type
+get_evaluation_counter(oh::OptimizationHelper) = oh.stats.evaluation_counter
+get_max_evaluations(oh::OptimizationHelper) = oh.problem.max_evaluations

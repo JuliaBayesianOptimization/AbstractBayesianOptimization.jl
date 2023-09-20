@@ -14,7 +14,7 @@ include("BayesianOptimizationBase.jl")
 
 # helpers for problem definition & optimization logging
 export OptimizationHelper, evaluate_objective!, get_hist, get_solution, Min, Max
-include("OptimizationHelper/OptimizationHelper.jl")
+include("OptimizationHelper.jl")
 
 # utilities
 export from_unit_cube, to_unit_cube

@@ -5,21 +5,17 @@ module AbstractBayesianOptimization
 
 using Printf
 
-export
-    # abstract types and interface
-    AbstractDecisionSupportModel, AbstractPolicy,
-    initialize!, update!, apply_policy!,
-    # main optimization loop
-    optimize!,
-    # helpers for problem definition & optimization statistics
-    OptimizationHelper, evaluate_objective!, get_hist, get_solution, Min, Max,
-    # utilities
-    from_unit_cube, to_unit_cube
+# abstract types and interface
+export AbstractDecisionSupportModel, AbstractPolicy, initialize!, update!, next_batch!
+# main optimization loop
+export optimize!
+# helpers for problem definition & optimization statistics
+export OptimizationHelper, evaluate_objective!, get_hist, get_solution, Min, Max
+# utilities
+export from_unit_cube, to_unit_cube
 
 """
-Maintain a state of the decision support model (e.g. trust regions, local surrogates and
-corresponding AbstractHyperparameterHandler instances for maintaining their hyperparameters
-in TuRBO).
+Maintain a state of the decision support model (e.g. trust regions, local surrogates).
 
 An instance of AbstractDecisionSupportModel is used by the policy to decide where to sample
 next.
@@ -58,11 +54,11 @@ Process evaluations `ys` at points `xs`, i.e., aggregate new data into a decisio
 function update! end
 
 """
-    apply_policy(policy::AbstractPolicy, dsm::AbstractDecisionSupportModel, oh::OptimizationHelper)
+    next_batch!(policy::AbstractPolicy, dsm::AbstractDecisionSupportModel, oh::OptimizationHelper)
 
 Get the next batch of points for evaluation, applying policy may change internal state of `policy`.
 """
-function apply_policy! end
+function next_batch! end
 
 # idea from BaysianOptimization.jl
 @enum Sense Min=-1 Max=1
@@ -80,7 +76,7 @@ function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
     # TODO: add `&& oh.stats.total_duration <= oh.problem.max_duration` once implemented in oh
     while !dsm.state.isdone && oh.stats.evaluation_counter <= oh.problem.max_evaluations
         # apply policy to get a new batch
-        xs = apply_policy!(policy, dsm, oh)
+        xs = next_batch!(policy, dsm, oh)
         ys = evaluate_objective!(oh, xs)
         # trigger update of the decision support model, this may further evaluate f
         update!(dsm, oh, xs, ys)

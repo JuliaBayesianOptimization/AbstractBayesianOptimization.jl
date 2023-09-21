@@ -56,6 +56,12 @@ deliberately.
 """
 function is_done end
 
+"""
+    evaluation_budget(oh::OptimizationHelper) -> Int
+
+Return the number of times we can evaluate the objective.
+"""
+function evaluation_budget end
 # idea from BaysianOptimization.jl
 @enum Sense Min=-1 Max=1
 
@@ -76,6 +82,10 @@ function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
         end
         # apply policy to get a new batch
         xs = next_batch!(policy, dsm, oh)
+        if evaluation_budget(oh) < length(xs)
+            verbose && @info "No evaluation budget left for next batch. Optimization stopped."
+            break
+        end
         ys = evaluate_objective!(oh, xs)
         # trigger update of the decision support model, this may further evaluate f
         update!(dsm, oh, xs, ys)

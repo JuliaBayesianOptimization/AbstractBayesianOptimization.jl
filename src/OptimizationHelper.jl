@@ -128,7 +128,7 @@ function evaluate_objective!(oh::OptimizationHelper, xs)
         oh.stats.observed_maximizer .= xs[argmax_ys]
         # TODO: printing based on verbose levels
         oh.problem.verbose &&
-            @info @sprintf "#eval: %4i, new best objective approx. %6.4f" oh.stats.evaluation_counter oh.stats.observed_maximum
+            @info @sprintf "#eval: %4i, new best objective approx. %6.4f" oh.stats.evaluation_counter  (Int(oh.problem.sense) * oh.stats.observed_maximum)
     end
     return ys
 end

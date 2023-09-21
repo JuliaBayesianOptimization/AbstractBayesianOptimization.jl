@@ -15,8 +15,8 @@ include("BayesianOptimizationBase.jl")
 # helpers for problem definition & logging
 export Min, Max
 export OptimizationHelper, evaluate_objective!
-export get_hist, get_solution, get_dimension, get_domain_eltype, get_range_type,
-    get_evaluation_counter, get_max_evaluations
+export history, solution, dimension, domain_eltype, range_type,
+    evaluation_counter, max_evaluations, evaluation_budget
 
 include("OptimizationHelper.jl")
 

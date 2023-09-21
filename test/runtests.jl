@@ -84,11 +84,11 @@ end
         50,
         verbose = false)
     # init to -Inf
-    @test isinf(get_solution(oh3)[2])
+    @test isinf(solution(oh3)[2])
     evaluate_objective!(oh3, [[0.1, 0.9]])
     evaluate_objective!(oh3, [[0.5, 0.5], [0.1, 0.3], [0.5, 0.6], [0.5, 0.6]])
     evaluate_objective!(oh3, [[0.8, 0.1]])
-    optimizer, optimum = get_solution(oh3)
+    optimizer, optimum = solution(oh3)
     @test isapprox(optimizer, [0.5, 0.6])
     @test isapprox(optimum, 1.1)
 
@@ -103,12 +103,12 @@ end
     evaluate_objective!(oh4, [[0.1, 0.9], [0.1, 0.3]])
     evaluate_objective!(oh4, [[0.5, 0.5], [0.5, 0.6], [0.5, 0.6]])
     evaluate_objective!(oh4, [[0.8, 0.1]])
-    optimizer, optimum = get_solution(oh4)
+    optimizer, optimum = solution(oh4)
     @test isapprox(optimizer, [0.1, 0.3])
     @test isapprox(optimum, 0.4)
 end
 
-@testset "OptimizationHelper: get_hist" begin
+@testset "OptimizationHelper: history" begin
     # no_history = true
     oh5 = OptimizationHelper(x -> x[1] + x[2],
         Min,
@@ -117,7 +117,7 @@ end
         50,
         no_history = true,
         verbose = false)
-    @test_throws ErrorException get_hist(oh5)
+    @test_throws ErrorException history(oh5)
 
     oh6 = OptimizationHelper(x -> x[1] + x[2],
         Min,
@@ -126,28 +126,28 @@ end
         50,
         verbose = false)
     evaluate_objective!(oh6, [[0.0, 0.0], [1.0, 1.0]])
-    xs, ys = get_hist(oh6)
+    xs, ys = history(oh6)
     @test xs == [[-1.0, -1.0], [1.0, 1.0]]
     @test ys == [-2.0, 2.0]
 end
 
-@testset "OptimizationHelper: get_solution" begin
+@testset "OptimizationHelper: solution" begin
     oh7 = OptimizationHelper(x -> x[1] + x[2],
         Min,
         [-1.0, -1.0],
         [1.0, 1.0],
         50,
         verbose = false)
-    optimizer, optimum = get_solution(oh7)
+    optimizer, optimum = solution(oh7)
     @test isinf(optimum)
     evaluate_objective!(oh7, [[0.5, 0.0], [1.0, 1.0]])
     evaluate_objective!(oh7, [[0.1, 0.2]])
-    optimizer, optimum = get_solution(oh7)
+    optimizer, optimum = solution(oh7)
     @test isapprox(optimizer, [-0.8, -0.6])
     @test isapprox(optimum, -1.4)
 end
 
-@testset "OptimizationHelper: update_hist!" begin
+@testset "OptimizationHelper: update_history!" begin
     # no_history = true
     oh8 = OptimizationHelper(x -> x[1] + x[2],
         Min,
@@ -156,9 +156,9 @@ end
         50,
         no_history = true,
         verbose = false)
-    # update_hist! is not exported
-    @test_throws UndefVarError update_hist!(oh8, [[0.4, 0.4], [0.2, 0.3]], [1.0, 2.0])
-    @test_throws ErrorException AbstractBayesianOptimization.update_hist!(oh8,
+    # update_history! is not exported
+    @test_throws UndefVarError update_history!(oh8, [[0.4, 0.4], [0.2, 0.3]], [1.0, 2.0])
+    @test_throws ErrorException AbstractBayesianOptimization.update_history!(oh8,
         [[0.4, 0.4], [0.2, 0.3]],
         [1.0, 2.0])
     oh9 = OptimizationHelper(x -> x[1] + x[2],
@@ -177,21 +177,21 @@ end
     @test length(oh9.stats.hist_ys) == 4
 end
 
-@testset "OptimizationHelper: the rest of getters" begin
+@testset "OptimizationHelper: getters" begin
     oh10 = OptimizationHelper(x -> x[1] + x[2],
         Min,
         [-1.0, 1.0],
         [1.0, 1.5],
         50,
         verbose = false)
-    @test get_dimension(oh10) == 2
-    @test get_domain_eltype(oh10) == Float64
-    @test get_range_type(oh10) == Float64
-    @test get_evaluation_counter(oh10) == 0
-    @test get_max_evaluations(oh10) == 50
+    @test dimension(oh10) == 2
+    @test domain_eltype(oh10) == Float64
+    @test range_type(oh10) == Float64
+    @test evaluation_counter(oh10) == 0
+    @test max_evaluations(oh10) == 50
 end
 
-@testset "OptimizationHelper: is_done" begin
+@testset "OptimizationHelper: is_done, evaluation_budget" begin
     oh11 = OptimizationHelper(x -> x[1] + x[2],
         Min,
         [0.0, 0.0],
@@ -200,9 +200,11 @@ end
         verbose = false)
     @test !is_done(oh11; verbose = false)
     evaluate_objective!(oh11, [[0.1, 0.9]])
+    @test evaluation_budget(oh11) == 1
     @test !is_done(oh11; verbose = false)
     evaluate_objective!(oh11, [[0.2, 0.9]])
     # now we are done
+    @test evaluation_budget(oh11) == 0
     @test is_done(oh11; verbose = false)
     evaluate_objective!(oh11, [[0.1, 0.9], [0.1, 0.3]])
     @test is_done(oh11; verbose = false)

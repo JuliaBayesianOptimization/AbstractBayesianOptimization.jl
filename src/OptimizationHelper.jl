@@ -113,7 +113,7 @@ function evaluate_objective!(oh::OptimizationHelper, xs)
     if eltype(eltype(xs)) != oh.problem.domain_eltype
         throw(ErrorException("infered domain_eltype from lower (upper) bounds does not coincide with actual type of point we evaluate the objective at"))
     end
-    oh.stats.no_history || update_hist!(oh, xs, ys)
+    oh.stats.no_history || update_history!(oh, xs, ys)
     argmax_ys = argmax(ys)
     if ys[argmax_ys] > oh.stats.observed_maximum
         oh.stats.observed_maximum = ys[argmax_ys]
@@ -126,15 +126,15 @@ function evaluate_objective!(oh::OptimizationHelper, xs)
     return ys
 end
 """
-    update_hist!(oh::OptimizationHelper, xs, ys)
+    update_history!(oh::OptimizationHelper, xs, ys)
 
 Add (normalized) evaluations `ys` at (normalized) points `xs`⊂ [0,1]^dimension into history.
 """
-function update_hist!(oh::OptimizationHelper, xs, ys)
+function update_history!(oh::OptimizationHelper, xs, ys)
     all(all(0 .<= x .<= 1) for x in xs) ||
         throw(ArgumentError("trying to add points outside of unit cube"))
     oh.stats.no_history &&
-        throw(ErrorException("calling update_hist! with flag no_hist = true"))
+        throw(ErrorException("calling update_history! with flag no_hist = true"))
     (length(xs) == 0 || length(ys) == 0) && throw(ArgumentError("xs or ys is empty"))
     length(xs) == length(ys) || throw(ArgumentError("xs, ys have different lenghts"))
     append!(oh.stats.hist_xs, xs)
@@ -143,25 +143,25 @@ function update_hist!(oh::OptimizationHelper, xs, ys)
 end
 
 """
-    get_hist(oh::OptimizationHelper)
+    history(oh::OptimizationHelper)
 
 Return a tuple with first element equal to an array of evaluated points, the second element
 equal to corresponding objective values.
 """
-function get_hist(oh::OptimizationHelper)
+function history(oh::OptimizationHelper)
     oh.stats.no_history &&
-        throw(ErrorException("calling get_hist with flag no_hist = true"))
+        throw(ErrorException("calling history with flag no_hist = true"))
     # rescale from unit cube to lb, ub
     return [from_unit_cube(x, oh.problem.lb, oh.problem.ub) for x in oh.stats.hist_xs],
     Int(oh.problem.sense) .* oh.stats.hist_ys
 end
 
 """
-    get_solution(oh::OptimizationHelper)
+    solution(oh::OptimizationHelper)
 
 Return a tuple consisting of an observed optimizer and optimal value.
 """
-function get_solution(oh::OptimizationHelper)
+function solution(oh::OptimizationHelper)
     return from_unit_cube(oh.stats.observed_maximizer, oh.problem.lb, oh.problem.ub),
     Int(oh.problem.sense) * oh.stats.observed_maximum
 end
@@ -176,8 +176,11 @@ function is_done(oh::OptimizationHelper; verbose = true)
     end
 end
 
-get_dimension(oh::OptimizationHelper) = oh.problem.dimension
-get_domain_eltype(oh::OptimizationHelper) = oh.problem.domain_eltype
-get_range_type(oh::OptimizationHelper) = oh.problem.range_type
-get_evaluation_counter(oh::OptimizationHelper) = oh.stats.evaluation_counter
-get_max_evaluations(oh::OptimizationHelper) = oh.problem.max_evaluations
+dimension(oh::OptimizationHelper) = oh.problem.dimension
+domain_eltype(oh::OptimizationHelper) = oh.problem.domain_eltype
+range_type(oh::OptimizationHelper) = oh.problem.range_type
+evaluation_counter(oh::OptimizationHelper) = oh.stats.evaluation_counter
+max_evaluations(oh::OptimizationHelper) = oh.problem.max_evaluations
+function evaluation_budget(oh::OptimizationHelper)
+    oh.problem.max_evaluations - oh.stats.evaluation_counter
+end

@@ -1,7 +1,7 @@
 """
 Saves definition of an unconstrained optimization problem.
 """
-struct UnconstrainedProblem{S <: Real} <: AbstractOptimizationProblem
+struct UnconstrainedProblem{S <: Real, T <: Real} <: AbstractOptimizationProblem
     # Objective f
     f::Function
     dimension::Int
@@ -14,8 +14,7 @@ struct UnconstrainedProblem{S <: Real} <: AbstractOptimizationProblem
     ub::Vector{S}
     max_evaluations::Int
     # in seconds
-    max_duration::Float64
-    # max_duration::Int
+    max_duration::T
     # TODO: verbose levels, now Bool
     verbose::Bool
 end

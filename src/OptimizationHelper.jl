@@ -111,7 +111,6 @@ The (normalized) objective should only be evaluated using this method.
 function evaluate_objective!(oh::OptimizationHelper, xs)
     all(all(0 .<= x .<= 1) for x in xs) ||
         throw(ArgumentError("trying to evaluate at points outside of unit cube"))
-    # TODO: increase total duration time in oh
     ys = (oh.problem.f).(xs)
     oh.stats.evaluation_counter += length(xs)
     if eltype(ys) != oh.problem.range_type
@@ -128,7 +127,7 @@ function evaluate_objective!(oh::OptimizationHelper, xs)
         oh.stats.observed_maximizer .= xs[argmax_ys]
         # TODO: printing based on verbose levels
         oh.problem.verbose &&
-            @info @sprintf "#eval: %4i, new best objective approx. %6.4f" oh.stats.evaluation_counter  (Int(oh.problem.sense) * oh.stats.observed_maximum)
+            @info @sprintf "#eval: %4i, new best objective approx. %6.4f" oh.stats.evaluation_counter (Int(oh.problem.sense)*oh.stats.observed_maximum)
     end
     return ys
 end
@@ -173,9 +172,12 @@ function solution(oh::OptimizationHelper)
     Int(oh.problem.sense) * oh.stats.observed_maximum
 end
 
-function isdone(oh::OptimizationHelper; verbose = true)
+function isdone(oh::OptimizationHelper)
     if time() - oh.stats.start_time > oh.problem.max_duration
-        verbose && @info "Time duration has exeeded maximum duration."
+        oh.problem.verbose && @info "Time duration has exeeded maximum duration."
+        return true
+    elseif evaluation_budget(oh) <= 0
+        oh.problem.verbose && @info "Evaluation budget is used up."
         return true
     else
         return false
@@ -189,4 +191,13 @@ evaluation_counter(oh::OptimizationHelper) = oh.stats.evaluation_counter
 max_evaluations(oh::OptimizationHelper) = oh.problem.max_evaluations
 function evaluation_budget(oh::OptimizationHelper)
     oh.problem.max_evaluations - oh.stats.evaluation_counter
+end
+# normalized observed maximum, i.e., of the internal representation of the objective we maximize
+norm_observed_maximum(oh::OptimizationHelper) = oh.stats.observed_maximum
+# last (normalized) x in [0,1]^dimension that was evaluated
+function norm_last_x(oh::OptimizationHelper)
+    @assert oh.stats.evaluation_counter > 0
+    oh.stats.no_history &&
+        throw(ErrorException("no_history flag is set to false, cannot return last x"))
+    return oh.stats.hist_xs[end]
 end

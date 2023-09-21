@@ -74,17 +74,19 @@ Run the optimization loop.
 function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
     oh::AbstractOptimizationHelper; verbose = true)
     while true
-        if isdone(dsm; verbose)
+        if isdone(dsm)
             verbose && @info "Decision support model stopped optimization loop."
             break
-        elseif isdone(oh; verbose)
+        elseif isdone(oh)
             verbose && @info "Optimization helper stopped optimization loop."
             break
         end
         # apply policy to get a new batch
         xs = next_batch!(policy, dsm, oh)
+        # check if there is budget before evaluating the objective
         if evaluation_budget(oh) < length(xs)
-            verbose && @info "No evaluation budget left for the next batch. Optimization stopped."
+            verbose &&
+                @info "No evaluation budget left for the next batch. Optimization stopped."
             break
         end
         ys = evaluate_objective!(oh, xs)

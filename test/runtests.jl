@@ -191,21 +191,21 @@ end
     @test max_evaluations(oh10) == 50
 end
 
-@testset "OptimizationHelper: is_done, evaluation_budget" begin
+@testset "OptimizationHelper: isdone, evaluation_budget" begin
     oh11 = OptimizationHelper(x -> x[1] + x[2],
         Min,
         [0.0, 0.0],
         [1.0, 1.0],
         2,
         verbose = false)
-    @test !is_done(oh11; verbose = false)
+    @test !isdone(oh11; verbose = false)
     evaluate_objective!(oh11, [[0.1, 0.9]])
     @test evaluation_budget(oh11) == 1
-    @test !is_done(oh11; verbose = false)
+    @test !isdone(oh11; verbose = false)
     evaluate_objective!(oh11, [[0.2, 0.9]])
     # now we are done
     @test evaluation_budget(oh11) == 0
-    @test is_done(oh11; verbose = false)
+    @test isdone(oh11; verbose = false)
     evaluate_objective!(oh11, [[0.1, 0.9], [0.1, 0.3]])
-    @test is_done(oh11; verbose = false)
+    @test isdone(oh11; verbose = false)
 end

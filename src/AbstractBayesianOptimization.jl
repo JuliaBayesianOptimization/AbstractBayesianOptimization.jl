@@ -7,7 +7,7 @@ using Printf
 
 # abstract types and interface
 export AbstractDecisionSupportModel,
-    AbstractPolicy, initialize!, update!, next_batch!, is_done
+    AbstractPolicy, initialize!, update!, next_batch!, isdone
 # main optimization loop
 export optimize!
 include("BayesianOptimizationBase.jl")

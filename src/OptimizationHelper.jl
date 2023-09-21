@@ -13,6 +13,8 @@ struct UnconstrainedProblem{S <: Real} <: AbstractOptimizationProblem
     lb::Vector{S}
     ub::Vector{S}
     max_evaluations::Int
+    # in seconds
+    max_duration::Float64
     # max_duration::Int
     # TODO: verbose levels, now Bool
     verbose::Bool
@@ -23,15 +25,15 @@ Saves optimization statistics.
 """
 mutable struct OptimizationStats{U <: Real, V <: Real}
     evaluation_counter::Int
-    # TODO: duration; for now, don't measure time
-    # total_duration::Any
     const no_history::Bool
     # evaluations in the normalized domain in [0,1]^dim
-    hist_xs::Vector{Vector{U}}
-    hist_ys::Vector{V}
-    observed_maximizer::Vector{U}
+    const hist_xs::Vector{Vector{U}}
+    const hist_ys::Vector{V}
+    const observed_maximizer::Vector{U}
     # if we don't have any evaluations, we set observed_maximum to -Inf
     observed_maximum::V
+    # in seconds since the epoch, set by calling time() in constructor of OptimizationHelper
+    start_time::Float64
 end
 
 """
@@ -47,18 +49,19 @@ end
 
 # TODO: make lb, ub AbstractVector??
 """
-    OptimizationHelper(g, sense::Sense, lb::Vector{D}, ub::Vector{D}, max_evaluations; range_type = Float64, no_history = false) where D
+    OptimizationHelper(g, sense::Sense, lb::Vector{D}, ub::Vector{D}, max_evaluations; max_duration=Inf, range_type = Float64, no_history = false) where D
 
 Return an optimization helper, infer type of elements in the domain and dimension of
 the domain from lower (upper) bound.
 
-Argument `sense` can be either `Max` or `Min`.
+Argument `sense` can be either `Max` or `Min`, `max_duration` is in seconds.
 """
 function OptimizationHelper(g,
     sense::Sense,
     lb::Vector{U},
     ub::Vector{U},
     max_evaluations;
+    max_duration = Inf,
     range_type = Float64,
     verbose = true,
     no_history = false) where {U}
@@ -67,6 +70,9 @@ function OptimizationHelper(g,
         throw(ArgumentError("lowerbounds are not componentwise less or equal to upperbounds"))
     length(lb) == length(ub) ||
         throw(ArgumentError("lowerbounds, upperbounds have different lengths"))
+    max_evaluations >= 0 || throw(ArgumentError("max_evaluations < 0"))
+    max_duration >= 0 || throw(ArgumentError("max_duration < 0"))
+
     # infer dimension of the domain from lower (upper) bound
     dimension = length(lb)
     # Preprocessing: rescale the domain to [0,1]^dim, make it a maximization problem
@@ -80,13 +86,15 @@ function OptimizationHelper(g,
         lb,
         ub,
         max_evaluations,
+        max_duration,
         verbose)
     init_stats = OptimizationStats(0,
         no_history,
         Vector{Vector{U}}(),
         Vector{range_type}(),
         Vector{U}(undef, dimension),
-        -Inf)
+        -Inf,
+        time())
     return OptimizationHelper(problem, init_stats)
 end
 
@@ -117,7 +125,7 @@ function evaluate_objective!(oh::OptimizationHelper, xs)
     argmax_ys = argmax(ys)
     if ys[argmax_ys] > oh.stats.observed_maximum
         oh.stats.observed_maximum = ys[argmax_ys]
-        # copy elementwise from xs[argmax_ys] into oh.observed_maximizer (dimensions have to be equal)
+        # copy elementwise from xs[argmax_ys] into oh.observed_maximizer
         oh.stats.observed_maximizer .= xs[argmax_ys]
         # TODO: printing based on verbose levels
         oh.problem.verbose &&
@@ -166,10 +174,9 @@ function solution(oh::OptimizationHelper)
     Int(oh.problem.sense) * oh.stats.observed_maximum
 end
 
-function is_done(oh::OptimizationHelper; verbose = true)
-    # TODO: add `&& oh.stats.total_duration <= oh.problem.max_duration` once implemented in oh
-    if oh.stats.evaluation_counter >= oh.problem.max_evaluations
-        verbose && @info "Maximum number of evaluations is reached."
+function isdone(oh::OptimizationHelper; verbose = true)
+    if time() - oh.stats.start_time > oh.problem.max_duration
+        verbose && @info "Time duration has exeeded maximum duration."
         return true
     else
         return false

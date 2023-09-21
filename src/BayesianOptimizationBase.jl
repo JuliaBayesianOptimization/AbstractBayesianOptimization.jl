@@ -48,13 +48,13 @@ Get the next batch of points for evaluation, applying policy may change internal
 function next_batch! end
 
 """
-    is_done(dsm::AbstractDecisionSupportModel; verbose=true) -> Bool
-    is_done(dsm::AbstractOptimizationHelper; verbose=true) -> Bool
+    isdone(dsm::AbstractDecisionSupportModel; verbose=true) -> Bool
+    isdone(dsm::AbstractOptimizationHelper; verbose=true) -> Bool
 
 A method that allows decision support model or optimization helper to stop optimization loop
 deliberately.
 """
-function is_done end
+function isdone end
 
 """
     evaluation_budget(oh::OptimizationHelper) -> Int
@@ -62,7 +62,8 @@ function is_done end
 Return the number of times we can evaluate the objective.
 """
 function evaluation_budget end
-# idea from BaysianOptimization.jl
+
+# idea from https://github.com/jbrea/BayesianOptimization.jl
 @enum Sense Min=-1 Max=1
 
 """
@@ -73,17 +74,17 @@ Run the optimization loop.
 function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
     oh::AbstractOptimizationHelper; verbose = true)
     while true
-        if is_done(dsm; verbose)
+        if isdone(dsm; verbose)
             verbose && @info "Decision support model stopped optimization loop."
             break
-        elseif is_done(oh; verbose)
+        elseif isdone(oh; verbose)
             verbose && @info "Optimization helper stopped optimization loop."
             break
         end
         # apply policy to get a new batch
         xs = next_batch!(policy, dsm, oh)
         if evaluation_budget(oh) < length(xs)
-            verbose && @info "No evaluation budget left for next batch. Optimization stopped."
+            verbose && @info "No evaluation budget left for the next batch. Optimization stopped."
             break
         end
         ys = evaluate_objective!(oh, xs)

@@ -66,6 +66,19 @@ function evaluation_budget end
 # idea from https://github.com/jbrea/BayesianOptimization.jl
 @enum Sense Min=-1 Max=1
 
+
+function run_optimization(dsm::AbstractDecisionSupportModel, oh::AbstractOptimizationHelper)
+    if isdone(dsm)
+        verbose && @info "Decision support model stopped optimization loop."
+        return false
+    elseif isdone(oh)
+        verbose && @info "Optimization helper stopped optimization loop."
+        return false
+    else
+        return true
+    end
+end
+
 """
     optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy, oh::AbstractOptimizationHelper; verbose=true)
 
@@ -73,14 +86,7 @@ Run the optimization loop.
 """
 function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
     oh::AbstractOptimizationHelper; verbose = true)
-    while true
-        if isdone(dsm)
-            verbose && @info "Decision support model stopped optimization loop."
-            break
-        elseif isdone(oh)
-            verbose && @info "Optimization helper stopped optimization loop."
-            break
-        end
+    while run_optimization(dsm, oh)
         # apply policy to get a new batch
         xs = next_batch!(policy, dsm, oh)
         # check if there is budget before evaluating the objective

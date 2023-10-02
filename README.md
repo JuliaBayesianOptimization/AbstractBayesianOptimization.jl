@@ -1,4 +1,4 @@
-# AbstractBayesianOptimization
+# AbstractBayesianOptimization.jl
 
 *This repo contains experimental code at the moment.*
 

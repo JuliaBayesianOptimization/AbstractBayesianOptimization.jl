@@ -47,9 +47,10 @@ Get the next batch of points for evaluation, applying policy may change internal
 """
 function next_batch! end
 
+# TODO: should this be Base.isdone? Or is that type-piracy?
 """
-    isdone(dsm::AbstractDecisionSupportModel; verbose=true) -> Bool
-    isdone(dsm::AbstractOptimizationHelper; verbose=true) -> Bool
+    isdone(dsm::AbstractDecisionSupportModel) -> Bool
+    isdone(dsm::AbstractOptimizationHelper) -> Bool
 
 A method that allows decision support model or optimization helper to stop optimization loop
 deliberately.
@@ -67,7 +68,7 @@ function evaluation_budget end
 @enum Sense Min=-1 Max=1
 
 
-function run_optimization(dsm::AbstractDecisionSupportModel, oh::AbstractOptimizationHelper)
+function run_optimization(dsm::AbstractDecisionSupportModel, oh::AbstractOptimizationHelper, verbose)
     if isdone(dsm)
         verbose && @info "Decision support model stopped optimization loop."
         return false
@@ -86,7 +87,7 @@ Run the optimization loop.
 """
 function optimize!(dsm::AbstractDecisionSupportModel, policy::AbstractPolicy,
     oh::AbstractOptimizationHelper; verbose = true)
-    while run_optimization(dsm, oh)
+    while run_optimization(dsm, oh, verbose)
         # apply policy to get a new batch
         xs = next_batch!(policy, dsm, oh)
         # check if there is budget before evaluating the objective

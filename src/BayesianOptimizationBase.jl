@@ -67,8 +67,9 @@ function evaluation_budget end
 # idea from https://github.com/jbrea/BayesianOptimization.jl
 @enum Sense Min=-1 Max=1
 
-
-function run_optimization(dsm::AbstractDecisionSupportModel, oh::AbstractOptimizationHelper, verbose)
+function run_optimization(dsm::AbstractDecisionSupportModel,
+    oh::AbstractOptimizationHelper,
+    verbose)
     if isdone(dsm)
         verbose && @info "Decision support model stopped optimization loop."
         return false

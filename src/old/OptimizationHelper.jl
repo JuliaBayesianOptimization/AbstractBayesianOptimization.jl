@@ -1,7 +1,7 @@
 # """
-# Saves definition of an unconstrained optimization problem.
+# Saves definition of a box constrained optimization problem.
 # """
-# struct UnconstrainedProblem{S <: Real, T <: Real} <: AbstractOptimizationProblem
+# struct BoxConstrainedProblem{S <: Real, T <: Real} <: AbstractOptimizationProblem
 #     # Objective f
 #     f::Function
 #     dimension::Int
@@ -77,7 +77,7 @@
 #     # Preprocessing: rescale the domain to [0,1]^dim, make it a maximization problem
 #     f(x) = Int(sense) * g(from_unit_cube(x, lb, ub))
 #     # infer type of the domain from lower (upper) bound
-#     problem = UnconstrainedProblem(f,
+#     problem = BoxConstrainedProblem(f,
 #         dimension,
 #         U,
 #         range_type,

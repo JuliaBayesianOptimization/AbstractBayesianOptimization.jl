@@ -1,0 +1,2 @@
+- create lists with tasks, e.g., tasks for setting up the normalizers, task for initialization of the surrogate, tasks for reinitialization of a TR etc.
+    - pass a task list for performing operations

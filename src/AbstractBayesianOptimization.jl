@@ -1,28 +1,28 @@
-"""
-Provides an interface and helper utilities for implementing Bayesian optimization algrithms.
-"""
-module AbstractBayesianOptimization
+# """
+# Provides an interface and helper utilities for implementing Bayesian optimization algrithms.
+# """
+# module AbstractBayesianOptimization
 
-using Printf
+# using Printf
 
-# abstract types and interface
-export AbstractDecisionSupportModel,
-    AbstractPolicy, initialize!, update!, next_batch!, isdone
-# main optimization loop
-export optimize!
-include("BayesianOptimizationBase.jl")
+# # abstract types and interface
+# export AbstractDecisionSupportModel,
+#     AbstractPolicy, initialize!, update!, next_batch!, isdone
+# # main optimization loop
+# export optimize!
+# include("BayesianOptimizationBase.jl")
 
-# helpers for problem definition & logging
-export Min, Max
-export OptimizationHelper, evaluate_objective!
-export history, solution, dimension, domain_eltype, range_type,
-    evaluation_counter, max_evaluations, evaluation_budget,
-    norm_observed_maximum, norm_last_x
+# # helpers for problem definition & logging
+# export Min, Max
+# export OptimizationHelper, evaluate_objective!
+# export history, solution, dimension, domain_eltype, range_type,
+#     evaluation_counter, max_evaluations, evaluation_budget,
+#     norm_observed_maximum, norm_last_x
 
-include("OptimizationHelper.jl")
+# include("OptimizationHelper.jl")
 
-# utilities
-export from_unit_cube, to_unit_cube
-include("utils.jl")
+# # utilities
+# export from_unit_cube, to_unit_cube
+# include("utils.jl")
 
-end # module
+# end # module

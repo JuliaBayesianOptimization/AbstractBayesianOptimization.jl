@@ -4,7 +4,7 @@
 
 ## About
 
-This package formulates a prototypical Bayesian optimization algorithm using abstract building blocks. Currently it supports gradient free optimization only.
+This package formulates a prototypical Bayesian optimization algorithm using an ask-tell interface. Currently it supports gradient free optimization only.
 
 It comes with a basic `OptimizationHelper` that provides utilities for unconstrained problem definition and logging.
 

@@ -120,10 +120,10 @@ isdone(BO_alg::BasicBO) = isdone(BO_alg.policy) || isdone(BO_alg.dsm)
 function optimize!(BO_alg::AbstractBOAlgorithm, opt_problem::AbstractOptimizationProblem)
     while !isdone(BO_alg::AbstractBOAlgorithm)
         # TODO maybe more tasks per iteration?
-        task = ask(BO_alg)
+        task, callback = ask(BO_alg)
         log_task(task)
-        result = process_task(opt_problem, task) # e.g. eval objective or return box lower, upper bounds
-        tell!(BO_alg, result) # TODO: tell the result to the task?
+         # e.g. eval objective and update surrogate by passing update!(..) into callback
+        callback(process_task(opt_problem, task))
     end
 end
 

@@ -32,12 +32,8 @@ struct BoxConstrainedProblem{S <: Real, T <: Real} <: AbstractOptimizationProble
     # verbose::Bool
 end
 
-function process_task(opt_problem::BoxConstrainedProblem,  _::GetLowerbound)
-    opt_problem.lb
-end
-
-function process_task(opt_problem::BoxConstrainedProblem,  _::GetUpperbound)
-    opt_problem.ub
+function process_task(opt_problem::BoxConstrainedProblem,  _::GetBoxConstraints)
+    opt_problem.lb, opt_problem.ub
 end
 
 function process_task(opt_problem::BoxConstrainedProblem,  _::GetSense)

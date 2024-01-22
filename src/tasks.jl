@@ -1,7 +1,6 @@
 abstract type AbstractTask end
 
-struct GetLowerbound <: AbstractTask end
-struct GetUpperbound <: AbstractTask end
+struct GetBoxConstraints <: AbstractTask end
 struct GetSense <: AbstractTask end
 
 """
@@ -11,12 +10,8 @@ struct EvalObjective <: AbstractTask
     xs
 end
 
-function log_task(_::GetLowerbound)
-    @info "Task: GetLowerbound"
-end
-
-function log_task(_::GetUpperbound)
-    @info "Task: GetUpperbound"
+function log_task(_::GetBoxConstraints)
+    @info "Task: GetBoxConstraints"
 end
 
 function log_task(_::GetSense)
